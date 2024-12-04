@@ -1,71 +1,78 @@
-import re
-
-
-def find_horizontal(text: str) -> int:
-    return len(re.findall("XMAS", text)) + len(re.findall("SAMX", text))
-
-
-def find_vertical(text: str) -> int:
-    hor_list: list[str] = text.splitlines()
-    ver_list: list[str] = []
-    for i in range(len(hor_list)):
-        col: list[str] = []
-        for row in hor_list:
-            try:
-                col.append(row[i])
-            except IndexError:
-                pass
-        ver_list.append("".join(col))
-    return find_horizontal("\n".join(ver_list))
-
-
-def find_diagonal(text: str) -> int:
-    count = 0
-    lines = text.splitlines()
-    # lr
-    new_lines = lines.copy()
-    for i, line in enumerate(lines):
-        if "M" in line:
-            new_lines[i] = new_lines[i][1:]
-        if "A" in line:
-            new_lines[i] = new_lines[i][2:]
-        if "S" in line:
-            new_lines[i] = new_lines[i][3:]
-    count += find_vertical("\n".join(new_lines))
-    # ll
-    new_lines = lines.copy()
-    for i, line in enumerate(lines):
-        if "M" in line:
-            new_lines[i] = "." + new_lines[i]
-        if "A" in line:
-            new_lines[i] = ".." + new_lines[i]
-        if "S" in line:
-            new_lines[i] = "..." + new_lines[i]
-    count += find_vertical("\n".join(new_lines))
-    # ur
-    new_lines = lines.copy()
-    for i, line in enumerate(lines):
-        if "A" in line:
-            new_lines[i] = new_lines[i][1:]
-        if "M" in line:
-            new_lines[i] = new_lines[i][2:]
-        if "X" in line:
-            new_lines[i] = new_lines[i][3:]
-    count += find_vertical("\n".join(new_lines))
-    # ul
-    new_lines = lines.copy()
-    for i, line in enumerate(lines):
-        if "A" in line:
-            new_lines[i] = "." + new_lines[i]
-        if "M" in line:
-            new_lines[i] = ".." + new_lines[i]
-        if "X" in line:
-            new_lines[i] = "..." + new_lines[i]
-    count += find_vertical("\n".join(new_lines))
-    return count
-
+# You gotta admit, this code is crazily efficient
 
 with open("04-1.txt", "r", encoding="utf-8") as fp:
     text = fp.read()
 
-print(find_horizontal(text) + find_vertical(text) + find_diagonal(text))
+count = 0
+rows = text.splitlines()
+length = len(rows[0])
+num_rows = len(rows)
+for i, row in enumerate(rows):
+    for j, c in enumerate(row):
+        if c == "X":
+            if (
+                j < length - 3
+                and row[j:j + 4] == "XMAS"
+            ):
+                # Right
+                count += 1
+            if (
+                j > 2
+                and row[j - 3:j + 1] == "SAMX"
+            ):
+                # Left
+                count += 1
+            if (
+                i > 2
+                and rows[i - 1][j] == "M"
+                and rows[i - 2][j] == "A"
+                and rows[i - 3][j] == "S"
+            ):
+                # Up
+                count += 1
+            if (
+                i < num_rows - 3
+                and rows[i + 1][j] == "M"
+                and rows[i + 2][j] == "A"
+                and rows[i + 3][j] == "S"
+            ):
+                # Down
+                count += 1
+            if (
+                i > 2
+                and j > 2
+                and rows[i - 1][j - 1] == "M"
+                and rows[i - 2][j - 2] == "A"
+                and rows[i - 3][j - 3] == "S"
+            ):
+                # Upper left
+                count += 1
+            if (
+                i > 2
+                and j < length - 3
+                and rows[i - 1][j + 1] == "M"
+                and rows[i - 2][j + 2] == "A"
+                and rows[i - 3][j + 3] == "S"
+            ):
+                # Upper right
+                count += 1
+            if (
+                i < num_rows - 3
+                and j > 2
+                and rows[i + 1][j - 1] == "M"
+                and rows[i + 2][j - 2] == "A"
+                and rows[i + 3][j - 3] == "S"
+            ):
+                # Lower left
+                count += 1
+            if (
+                i < num_rows - 3
+                and j < length - 3
+                and rows[i + 1][j + 1] == "M"
+                and rows[i + 2][j + 2] == "A"
+                and rows[i + 3][j + 3] == "S"
+            ):
+                # Lower right
+                count += 1
+
+print(count)
