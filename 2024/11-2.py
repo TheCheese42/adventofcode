@@ -1,4 +1,3 @@
-from collections import Counter
 from functools import cache
 
 with open("11-1.txt", "r", encoding="utf-8") as fp:
